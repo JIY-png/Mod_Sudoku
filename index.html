@@ -1,0 +1,2664 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sudoku</title>
+  <style>
+    /* ============================================================
+       CSS Custom Properties — theme variables
+       Active theme class applied to <body>  e.g. body.theme-ocean
+    ============================================================ */
+
+    /* ── DEFAULT: Classic Light ─────────────────────────────── */
+    :root {
+      --bg: #f0f4f8;
+      --surface: #ffffff;
+      --surface-alt: #e8edf2;
+      --border: #b0bec5;
+      --border-bold: #37474f;
+      --text: #212121;
+      --text-muted: #607d8b;
+      --given-bg: #cfd8dc;
+      --given-text: #1a237e;
+      --selected-bg: #bbdefb;
+      --peer-bg: #e3f2fd;
+      --conflict-bg: #ffcdd2;
+      --conflict-border: #e53935;
+      --pencil-color: #1565c0;
+      --btn-bg: #37474f;
+      --btn-text: #ffffff;
+      --btn-hover: #546e7a;
+      --btn-active-bg: #1565c0;
+      --modal-bg: rgba(0, 0, 0, 0.55);
+      --modal-surface: #ffffff;
+      --accent: #1976d2;
+      --success: #2e7d32;
+      --erase-btn-bg: #b71c1c;
+      --erase-btn-hover: #c62828;
+      --shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    /* ── MIDNIGHT: Dark ─────────────────────────────────────── */
+    body.theme-midnight {
+      --bg: #121212;
+      --surface: #1e1e1e;
+      --surface-alt: #2a2a2a;
+      --border: #444;
+      --border-bold: #ccc;
+      --text: #e0e0e0;
+      --text-muted: #9e9e9e;
+      --given-bg: #2c3e50;
+      --given-text: #90caf9;
+      --selected-bg: #1a3a5c;
+      --peer-bg: #1a2a3a;
+      --conflict-bg: #4a1515;
+      --conflict-border: #ef5350;
+      --pencil-color: #64b5f6;
+      --btn-bg: #2a2a2a;
+      --btn-text: #e0e0e0;
+      --btn-hover: #3a3a3a;
+      --btn-active-bg: #1565c0;
+      --modal-bg: rgba(0, 0, 0, 0.75);
+      --modal-surface: #1e1e1e;
+      --accent: #42a5f5;
+      --success: #66bb6a;
+      --erase-btn-bg: #7f0000;
+      --erase-btn-hover: #b71c1c;
+      --shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    /* ── OCEAN: Deep blue gradient ──────────────────────────── */
+    body.theme-ocean {
+      --bg: transparent;
+      --surface: rgba(255, 255, 255, 0.14);
+      --surface-alt: rgba(255, 255, 255, 0.08);
+      --border: rgba(255, 255, 255, 0.25);
+      --border-bold: rgba(255, 255, 255, 0.70);
+      --text: #e8f4fd;
+      --text-muted: #90caf9;
+      --given-bg: rgba(21, 101, 192, 0.55);
+      --given-text: #e3f2fd;
+      --selected-bg: rgba(100, 181, 246, 0.45);
+      --peer-bg: rgba(100, 181, 246, 0.18);
+      --conflict-bg: rgba(229, 57, 53, 0.35);
+      --conflict-border: #ff8a80;
+      --pencil-color: #b3e5fc;
+      --btn-bg: rgba(13, 71, 161, 0.75);
+      --btn-text: #e8f4fd;
+      --btn-hover: rgba(21, 101, 192, 0.85);
+      --btn-active-bg: #0288d1;
+      --modal-bg: rgba(0, 20, 60, 0.72);
+      --modal-surface: rgba(13, 71, 161, 0.95);
+      --accent: #80d8ff;
+      --success: #69f0ae;
+      --erase-btn-bg: rgba(183, 28, 28, 0.7);
+      --erase-btn-hover: rgba(198, 40, 40, 0.85);
+      --shadow: 0 4px 24px rgba(0, 50, 120, 0.4);
+    }
+
+    /* ── FOREST: Green nature ───────────────────────────────── */
+    body.theme-forest {
+      --bg: transparent;
+      --surface: rgba(255, 255, 255, 0.15);
+      --surface-alt: rgba(255, 255, 255, 0.09);
+      --border: rgba(255, 255, 255, 0.28);
+      --border-bold: rgba(255, 255, 255, 0.75);
+      --text: #f1f8e9;
+      --text-muted: #a5d6a7;
+      --given-bg: rgba(27, 94, 32, 0.60);
+      --given-text: #e8f5e9;
+      --selected-bg: rgba(102, 187, 106, 0.45);
+      --peer-bg: rgba(102, 187, 106, 0.18);
+      --conflict-bg: rgba(183, 28, 28, 0.35);
+      --conflict-border: #ff8a80;
+      --pencil-color: #ccff90;
+      --btn-bg: rgba(27, 94, 32, 0.75);
+      --btn-text: #f1f8e9;
+      --btn-hover: rgba(46, 125, 50, 0.85);
+      --btn-active-bg: #388e3c;
+      --modal-bg: rgba(0, 30, 10, 0.72);
+      --modal-surface: rgba(27, 94, 32, 0.95);
+      --accent: #b9f6ca;
+      --success: #69f0ae;
+      --erase-btn-bg: rgba(136, 14, 79, 0.7);
+      --erase-btn-hover: rgba(173, 20, 87, 0.85);
+      --shadow: 0 4px 24px rgba(0, 60, 20, 0.45);
+    }
+
+    /* ── SUNSET: Warm orange/pink ───────────────────────────── */
+    body.theme-sunset {
+      --bg: transparent;
+      --surface: rgba(255, 255, 255, 0.18);
+      --surface-alt: rgba(255, 255, 255, 0.10);
+      --border: rgba(255, 255, 255, 0.30);
+      --border-bold: rgba(255, 255, 255, 0.80);
+      --text: #fff8f0;
+      --text-muted: #ffccbc;
+      --given-bg: rgba(191, 54, 12, 0.50);
+      --given-text: #fff3e0;
+      --selected-bg: rgba(255, 183, 77, 0.50);
+      --peer-bg: rgba(255, 183, 77, 0.20);
+      --conflict-bg: rgba(136, 14, 79, 0.35);
+      --conflict-border: #ff80ab;
+      --pencil-color: #ffe082;
+      --btn-bg: rgba(191, 54, 12, 0.72);
+      --btn-text: #fff8f0;
+      --btn-hover: rgba(230, 74, 25, 0.85);
+      --btn-active-bg: #f57c00;
+      --modal-bg: rgba(60, 10, 0, 0.72);
+      --modal-surface: rgba(191, 54, 12, 0.95);
+      --accent: #ffe0b2;
+      --success: #ccff90;
+      --erase-btn-bg: rgba(136, 14, 79, 0.70);
+      --erase-btn-hover: rgba(173, 20, 87, 0.85);
+      --shadow: 0 4px 24px rgba(120, 40, 0, 0.4);
+    }
+
+    /* ── GALAXY: Deep-space purple ──────────────────────────── */
+    body.theme-galaxy {
+      --bg: transparent;
+      --surface: rgba(255, 255, 255, 0.08);
+      --surface-alt: rgba(255, 255, 255, 0.05);
+      --border: rgba(200, 180, 255, 0.25);
+      --border-bold: rgba(200, 180, 255, 0.70);
+      --text: #ede7f6;
+      --text-muted: #ce93d8;
+      --given-bg: rgba(74, 20, 140, 0.60);
+      --given-text: #ede7f6;
+      --selected-bg: rgba(171, 71, 188, 0.45);
+      --peer-bg: rgba(171, 71, 188, 0.18);
+      --conflict-bg: rgba(183, 28, 28, 0.35);
+      --conflict-border: #ff80ab;
+      --pencil-color: #ea80fc;
+      --btn-bg: rgba(74, 20, 140, 0.72);
+      --btn-text: #ede7f6;
+      --btn-hover: rgba(106, 27, 154, 0.85);
+      --btn-active-bg: #7b1fa2;
+      --modal-bg: rgba(10, 0, 30, 0.80);
+      --modal-surface: rgba(49, 27, 146, 0.95);
+      --accent: #ea80fc;
+      --success: #69f0ae;
+      --erase-btn-bg: rgba(136, 14, 79, 0.70);
+      --erase-btn-hover: rgba(173, 20, 87, 0.85);
+      --shadow: 0 4px 24px rgba(80, 0, 160, 0.5);
+    }
+
+    /* ── BLOSSOM: Cherry pink ───────────────────────────────── */
+    body.theme-blossom {
+      --bg: transparent;
+      --surface: rgba(255, 255, 255, 0.55);
+      --surface-alt: rgba(252, 228, 236, 0.50);
+      --border: rgba(233, 30, 99, 0.20);
+      --border-bold: rgba(173, 20, 87, 0.60);
+      --text: #3e0020;
+      --text-muted: #ad1457;
+      --given-bg: rgba(248, 187, 208, 0.85);
+      --given-text: #880e4f;
+      --selected-bg: rgba(248, 187, 208, 0.90);
+      --peer-bg: rgba(252, 228, 236, 0.75);
+      --conflict-bg: rgba(183, 28, 28, 0.20);
+      --conflict-border: #c62828;
+      --pencil-color: #880e4f;
+      --btn-bg: rgba(173, 20, 87, 0.80);
+      --btn-text: #fff;
+      --btn-hover: rgba(197, 17, 98, 0.90);
+      --btn-active-bg: #880e4f;
+      --modal-bg: rgba(60, 0, 20, 0.55);
+      --modal-surface: rgba(255, 240, 245, 0.97);
+      --accent: #c2185b;
+      --success: #2e7d32;
+      --erase-btn-bg: rgba(183, 28, 28, 0.75);
+      --erase-btn-hover: #c62828;
+      --shadow: 0 4px 24px rgba(200, 0, 80, 0.18);
+    }
+
+    /* ============================================================
+       Animated background — per-theme CSS layers
+    ============================================================ */
+
+    /* Layer 1 (z-index -2): solid/gradient fill */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background: #f0f4f8;
+      /* default Classic */
+      transition: background 0.6s;
+    }
+
+    /* Layer 2 (z-index -1): animation / pattern overlay */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      display: none;
+      /* hidden unless a themed class overrides */
+    }
+
+    /* ---- Classic: plain — no animation ---- */
+    /* (body::before default handles it) */
+
+    /* ---- Midnight: glowing orbs + twinkling stars ---- */
+    body.theme-midnight::before {
+      background:
+        radial-gradient(ellipse at 20% 50%, #1a237e33 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, #0d47a133 0%, transparent 55%),
+        #121212;
+    }
+
+    body.theme-midnight::after {
+      display: block;
+      background-image:
+        radial-gradient(1px 1px at 10% 15%, #fff6 0%, transparent 100%),
+        radial-gradient(1px 1px at 30% 60%, #fff5 0%, transparent 100%),
+        radial-gradient(1px 1px at 55% 25%, #fff7 0%, transparent 100%),
+        radial-gradient(1px 1px at 70% 80%, #fff4 0%, transparent 100%),
+        radial-gradient(1px 1px at 85% 45%, #fff6 0%, transparent 100%),
+        radial-gradient(2px 2px at 40% 90%, #fff3 0%, transparent 100%),
+        radial-gradient(1px 1px at 92% 10%, #fff5 0%, transparent 100%);
+      animation: twinkle 6s ease-in-out infinite alternate;
+    }
+
+    @keyframes twinkle {
+      0% {
+        opacity: 0.4;
+      }
+
+      50% {
+        opacity: 1.0;
+      }
+
+      100% {
+        opacity: 0.5;
+      }
+    }
+
+    /* ---- Ocean: animated gradient + horizontal wave bands ---- */
+    body.theme-ocean::before {
+      background: linear-gradient(135deg, #0d47a1, #01579b, #006064, #004d40);
+      background-size: 300% 300%;
+      animation: oceanShift 12s ease infinite;
+    }
+
+    body.theme-ocean::after {
+      display: block;
+      background: repeating-linear-gradient(to bottom,
+          transparent 0px,
+          transparent 38px,
+          rgba(255, 255, 255, 0.04) 38px,
+          rgba(255, 255, 255, 0.04) 40px);
+      animation: waveScroll 8s linear infinite;
+    }
+
+    @keyframes oceanShift {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    @keyframes waveScroll {
+      from {
+        background-position-y: 0;
+      }
+
+      to {
+        background-position-y: 80px;
+      }
+    }
+
+    /* ---- Forest: radial canopy gradient + drifting leaf dots ---- */
+    body.theme-forest::before {
+      background:
+        radial-gradient(ellipse at 0% 100%, #1b5e20cc 0%, transparent 55%),
+        radial-gradient(ellipse at 100% 100%, #33691e99 0%, transparent 55%),
+        radial-gradient(ellipse at 50% 0%, #004d4088 0%, transparent 60%),
+        linear-gradient(180deg, #1a3620, #2e5a1e);
+      animation: forestBreeze 14s ease-in-out infinite alternate;
+    }
+
+    body.theme-forest::after {
+      display: block;
+      background-image:
+        radial-gradient(ellipse 6px 10px at 15% 20%, #4caf5022 0%, transparent 100%),
+        radial-gradient(ellipse 6px 10px at 40% 70%, #66bb6a22 0%, transparent 100%),
+        radial-gradient(ellipse 6px 10px at 72% 35%, #4caf5022 0%, transparent 100%),
+        radial-gradient(ellipse 6px 10px at 88% 80%, #66bb6a22 0%, transparent 100%);
+      background-size: 200px 200px;
+      animation: leafDrift 20s linear infinite;
+    }
+
+    @keyframes forestBreeze {
+      0% {
+        filter: brightness(1);
+      }
+
+      100% {
+        filter: brightness(1.08);
+      }
+    }
+
+    @keyframes leafDrift {
+      from {
+        background-position: 0 0;
+      }
+
+      to {
+        background-position: 60px 120px;
+      }
+    }
+
+    /* ---- Sunset: warm gradient sweep + ray bands ---- */
+    body.theme-sunset::before {
+      background: linear-gradient(160deg, #bf360c, #e64a19, #ff6f00, #f9a825, #e91e63);
+      background-size: 400% 400%;
+      animation: sunsetShift 10s ease infinite;
+    }
+
+    body.theme-sunset::after {
+      display: block;
+      background: repeating-linear-gradient(to bottom,
+          rgba(255, 255, 255, 0.03) 0px,
+          rgba(255, 255, 255, 0.03) 2px,
+          transparent 2px,
+          transparent 60px);
+    }
+
+    @keyframes sunsetShift {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    /* ---- Galaxy: nebula pulse + floating stars ---- */
+    body.theme-galaxy::before {
+      background:
+        radial-gradient(ellipse at 20% 30%, #4a148c88 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 70%, #1a237e99 0%, transparent 55%),
+        radial-gradient(ellipse at 55% 10%, #6a1b9a55 0%, transparent 50%),
+        #0a001e;
+      animation: nebulaPulse 16s ease-in-out infinite alternate;
+    }
+
+    body.theme-galaxy::after {
+      display: block;
+      background-image:
+        radial-gradient(1px 1px at 5% 10%, #fffb 0%, transparent 100%),
+        radial-gradient(1px 1px at 20% 40%, #fff8 0%, transparent 100%),
+        radial-gradient(2px 2px at 35% 75%, #ea80fca0 0%, transparent 100%),
+        radial-gradient(1px 1px at 50% 20%, #fffb 0%, transparent 100%),
+        radial-gradient(1px 1px at 65% 55%, #fff9 0%, transparent 100%),
+        radial-gradient(2px 2px at 80% 15%, #80d8ffa0 0%, transparent 100%),
+        radial-gradient(1px 1px at 90% 85%, #fffa 0%, transparent 100%),
+        radial-gradient(1px 1px at 75% 92%, #fff7 0%, transparent 100%);
+      animation: starFloat 30s linear infinite;
+    }
+
+    @keyframes nebulaPulse {
+      0% {
+        filter: hue-rotate(0deg) brightness(1);
+      }
+
+      100% {
+        filter: hue-rotate(20deg) brightness(1.12);
+      }
+    }
+
+    @keyframes starFloat {
+      from {
+        background-position: 0 0;
+      }
+
+      to {
+        background-position: 200px 100px;
+      }
+    }
+
+    /* ---- Blossom: pink gradient + drifting petal dots ---- */
+    body.theme-blossom::before {
+      background: linear-gradient(135deg, #fce4ec, #f8bbd0, #fce4ec, #fff0f5);
+      background-size: 300% 300%;
+      animation: blossomBreeze 14s ease infinite;
+    }
+
+    body.theme-blossom::after {
+      display: block;
+      background-image:
+        radial-gradient(ellipse 8px 14px at 12% 30%, #f48fb1aa 0%, transparent 100%),
+        radial-gradient(ellipse 6px 10px at 35% 65%, #f06292aa 0%, transparent 100%),
+        radial-gradient(ellipse 8px 14px at 60% 20%, #f48fb1aa 0%, transparent 100%),
+        radial-gradient(ellipse 6px 10px at 82% 55%, #f06292aa 0%, transparent 100%),
+        radial-gradient(ellipse 8px 14px at 50% 88%, #f48fb1aa 0%, transparent 100%);
+      background-size: 250px 250px;
+      animation: petalDrift 18s linear infinite;
+    }
+
+    @keyframes blossomBreeze {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    @keyframes petalDrift {
+      from {
+        background-position: 0 0;
+      }
+
+      to {
+        background-position: -80px 120px;
+      }
+    }
+
+    /* ============================================================
+       Theme Picker Modal — card grid
+    ============================================================ */
+    #theme-modal .theme-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .theme-card {
+      border: 3px solid transparent;
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+      background: none;
+      padding: 0;
+      text-align: center;
+    }
+
+    .theme-card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.28);
+    }
+
+    .theme-card.active {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent);
+    }
+
+    .theme-card:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .theme-swatch {
+      width: 100%;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+    }
+
+    /* Swatch colour previews */
+    .swatch-classic {
+      background: linear-gradient(135deg, #f0f4f8 50%, #bbdefb);
+    }
+
+    .swatch-midnight {
+      background: linear-gradient(135deg, #121212, #1a237e);
+    }
+
+    .swatch-ocean {
+      background: linear-gradient(135deg, #0d47a1, #006064);
+    }
+
+    .swatch-forest {
+      background: linear-gradient(135deg, #1b5e20, #33691e);
+    }
+
+    .swatch-sunset {
+      background: linear-gradient(135deg, #bf360c, #f9a825);
+    }
+
+    .swatch-galaxy {
+      background: linear-gradient(135deg, #0a001e, #4a148c);
+    }
+
+    .swatch-blossom {
+      background: linear-gradient(135deg, #fce4ec, #f48fb1);
+    }
+
+    .theme-name {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 5px 4px;
+      color: var(--text);
+      background: var(--surface);
+      letter-spacing: 0.4px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ============================================================
+       Reset & Base
+    ============================================================ */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: background 0.25s, color 0.25s;
+    }
+
+    /* ============================================================
+       Header
+    ============================================================ */
+    header {
+      width: 100%;
+      max-width: 520px;
+      padding: 14px 16px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    header h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: var(--accent);
+    }
+
+    .header-btns {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    /* ============================================================
+       Buttons (shared base)
+    ============================================================ */
+    button {
+      cursor: pointer;
+      font-family: inherit;
+      border: none;
+      border-radius: 8px;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    button:active {
+      transform: scale(0.96);
+    }
+
+    .icon-btn {
+      background: var(--btn-bg);
+      color: var(--btn-text);
+      padding: 7px 12px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      border-radius: 8px;
+    }
+
+    .icon-btn:hover {
+      background: var(--btn-hover);
+    }
+
+    .icon-btn.active {
+      background: var(--btn-active-bg);
+    }
+
+    /* ============================================================
+       Controls row (difficulty, timer, reset)
+    ============================================================ */
+    main {
+      width: 100%;
+      max-width: 520px;
+      padding: 10px 16px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .controls {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .difficulty-group {
+      display: flex;
+      gap: 4px;
+    }
+
+    .diff-btn {
+      background: var(--btn-bg);
+      color: var(--btn-text);
+      padding: 7px 14px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .diff-btn:hover {
+      background: var(--btn-hover);
+    }
+
+    .diff-btn.active {
+      background: var(--btn-active-bg);
+    }
+
+    .timer-block {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #timer {
+      font-size: 1.15rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 2px;
+      color: var(--accent);
+      min-width: 58px;
+      text-align: right;
+    }
+
+    .reset-btn {
+      background: var(--btn-bg);
+      color: var(--btn-text);
+      padding: 7px 14px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .reset-btn:hover {
+      background: var(--btn-hover);
+    }
+
+    /* ============================================================
+       Sudoku Grid
+    ============================================================ */
+    #grid-wrapper {
+      width: 100%;
+      /* Ensure square aspect ratio */
+      aspect-ratio: 1 / 1;
+    }
+
+    #sudoku-grid {
+      display: grid;
+      grid-template-columns: repeat(9, 1fr);
+      grid-template-rows: repeat(9, 1fr);
+      width: 100%;
+      height: 100%;
+      border: 3px solid var(--border-bold);
+      border-radius: 4px;
+      overflow: hidden;
+      background: var(--border-bold);
+      gap: 1px;
+    }
+
+    /* ============================================================
+       Individual cells
+    ============================================================ */
+    .cell {
+      position: relative;
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(1rem, 4vw, 1.5rem);
+      font-weight: 600;
+      cursor: pointer;
+      user-select: none;
+      /* Thicker borders for 3x3 box delineation using box-shadow overlay */
+      outline: none;
+      min-height: 36px;
+      transition: background 0.12s;
+    }
+
+    /* Subgrid delineation (works across 4x4, 6x6, 9x9) */
+    .cell.subgrid-right {
+      box-shadow: inset -3px 0 0 var(--border-bold);
+    }
+
+    .cell.subgrid-bottom {
+      box-shadow: inset 0 -3px 0 var(--border-bold);
+    }
+
+    .cell.subgrid-right.subgrid-bottom {
+      box-shadow: inset -3px -3px 0 var(--border-bold);
+    }
+
+    /* Grid font sizing per grid size */
+    #sudoku-grid.size-4 .cell {
+      font-size: clamp(1.6rem, 7.5vw, 2.5rem);
+    }
+
+    #sudoku-grid.size-6 .cell {
+      font-size: clamp(1.2rem, 5.5vw, 1.9rem);
+    }
+
+    #sudoku-grid.size-9 .cell {
+      font-size: clamp(1rem, 4vw, 1.5rem);
+    }
+
+    /* Cell states */
+    .cell.given {
+      background: var(--given-bg);
+      color: var(--given-text);
+      cursor: default;
+    }
+
+    .cell.selected {
+      background: var(--selected-bg) !important;
+    }
+
+    .cell.peer {
+      background: var(--peer-bg);
+    }
+
+    /* Conflict: color + dashed border pattern (accessible) */
+    .cell.conflict {
+      background: var(--conflict-bg) !important;
+      outline: 2.5px dashed var(--conflict-border);
+      outline-offset: -2.5px;
+    }
+
+    /* Conflict indicator icon for colorblind accessibility */
+    .cell.conflict::after {
+      content: '!';
+      position: absolute;
+      top: 1px;
+      right: 3px;
+      font-size: 0.6em;
+      font-weight: 900;
+      color: var(--conflict-border);
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    /* Same-number highlighting */
+    .cell.same-number {
+      background: #ffe0b2;
+    }
+
+    body.dark .cell.same-number {
+      background: #3e2723;
+    }
+
+    /* User-entered number color */
+    .cell .cell-value {
+      color: var(--accent);
+    }
+
+    .cell.given .cell-value {
+      color: var(--given-text);
+    }
+
+    .cell.conflict .cell-value {
+      color: var(--conflict-border);
+    }
+
+    /* ============================================================
+       Pencil marks — 3×3 mini grid inside cell
+    ============================================================ */
+    .pencil-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      inset: 0;
+      padding: 2px;
+      pointer-events: none;
+    }
+
+    .pencil-mark {
+      font-size: clamp(0.45rem, 1.4vw, 0.6rem);
+      font-weight: 500;
+      color: var(--pencil-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+
+    /* ============================================================
+       Number input buttons
+    ============================================================ */
+    .numpad {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      width: 100%;
+    }
+
+    .num-btn {
+      background: var(--btn-bg);
+      color: var(--btn-text);
+      font-size: clamp(0.95rem, 3.5vw, 1.2rem);
+      font-weight: 700;
+      padding: 12px 4px;
+      border-radius: 10px;
+      min-height: 48px;
+    }
+
+    .num-btn:hover {
+      background: var(--btn-hover);
+    }
+
+    .num-btn:focus-visible {
+      outline: 2px solid var(--accent);
+    }
+
+    .erase-btn {
+      background: var(--erase-btn-bg);
+      color: #fff;
+    }
+
+    .erase-btn:hover {
+      background: var(--erase-btn-hover);
+    }
+
+    /* ============================================================
+       Pencil toggle
+    ============================================================ */
+    #pencil-btn {
+      width: 100%;
+      padding: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: var(--btn-bg);
+      color: var(--btn-text);
+      border-radius: 10px;
+    }
+
+    #pencil-btn:hover {
+      background: var(--btn-hover);
+    }
+
+    #pencil-btn.active {
+      background: var(--btn-active-bg);
+      color: #fff;
+    }
+
+    /* ============================================================
+       Modal (instructions + win screen)
+    ============================================================ */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--modal-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 16px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal {
+      background: var(--modal-surface);
+      border-radius: 14px;
+      padding: 24px;
+      max-width: 440px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow);
+      position: relative;
+      transform: scale(0.95);
+      transition: transform 0.2s;
+    }
+
+    .modal-overlay.open .modal {
+      transform: scale(1);
+    }
+
+    .modal h2 {
+      font-size: 1.3rem;
+      margin-bottom: 14px;
+      color: var(--accent);
+    }
+
+    .modal p,
+    .modal li {
+      font-size: 0.88rem;
+      line-height: 1.6;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .modal ul,
+    .modal ol {
+      padding-left: 18px;
+      margin-bottom: 10px;
+    }
+
+    .modal section {
+      margin-bottom: 14px;
+    }
+
+    .modal section h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: var(--btn-bg);
+      color: var(--btn-text);
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .modal-close:hover {
+      background: var(--btn-hover);
+    }
+
+    /* Win modal specifics & celebrations */
+    #win-modal .modal {
+      text-align: center;
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    #win-modal.open .modal {
+      transform: scale(1);
+      box-shadow: 0 0 40px rgba(76, 175, 80, 0.45), 0 10px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    #win-modal .win-emoji {
+      font-size: 3.4rem;
+      margin-bottom: 8px;
+      display: inline-block;
+      animation: winEmojiBounce 1.1s ease infinite alternate;
+    }
+
+    @keyframes winEmojiBounce {
+      0%   { transform: scale(1) rotate(-8deg); }
+      50%  { transform: scale(1.22) rotate(8deg); }
+      100% { transform: scale(1) rotate(-8deg); }
+    }
+
+    #win-modal h2 {
+      font-size: 1.6rem;
+      color: var(--success);
+      margin-bottom: 4px;
+    }
+
+    #win-modal .win-time {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin: 8px 0 16px;
+    }
+
+    #win-modal .play-again-btn {
+      background: var(--accent);
+      color: #fff;
+      padding: 12px 26px;
+      font-size: 1rem;
+      font-weight: 700;
+      border-radius: 10px;
+      transition: transform 0.15s, opacity 0.15s;
+    }
+
+    #win-modal .play-again-btn:hover {
+      opacity: 0.90;
+      transform: scale(1.03);
+    }
+
+    /* Confetti Canvas */
+    #confetti-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 10001; /* Rains over win modal */
+    }
+
+    /* Cell celebration ripple animation */
+    .cell.win-cell {
+      animation: winCellPop 0.8s ease forwards;
+    }
+
+    @keyframes winCellPop {
+      0% {
+        transform: scale(1);
+      }
+      40% {
+        transform: scale(1.08);
+        background: rgba(76, 175, 80, 0.35) !important;
+        color: #2e7d32 !important;
+        box-shadow: 0 0 14px rgba(76, 175, 80, 0.6);
+      }
+      100% {
+        transform: scale(1);
+        background: rgba(76, 175, 80, 0.16) !important;
+      }
+    }
+
+    /* ============================================================
+       Setup Screen Styles (shown before the grid)
+    ============================================================ */
+    .setup-container {
+      width: 100%;
+      max-width: 520px;
+      padding: 14px 16px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      animation: setupFadeIn 0.25s ease;
+    }
+
+    @keyframes setupFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .setup-card {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 24px 20px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .setup-header {
+      text-align: center;
+    }
+
+    .setup-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      background: var(--surface-alt);
+      color: var(--accent);
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .setup-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .setup-sub {
+      font-size: 0.84rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .setup-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .setup-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .setup-options {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .setup-opt-btn {
+      background: var(--surface-alt);
+      color: var(--text);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all 0.18s;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .setup-opt-btn:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .setup-opt-btn.active {
+      background: var(--btn-active-bg);
+      border-color: var(--accent);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(21, 101, 192, 0.35);
+    }
+
+    .setup-opt-btn .opt-badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      opacity: 0.85;
+    }
+
+    .setup-opt-btn .opt-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+    }
+
+    .setup-opt-btn .opt-desc {
+      font-size: 0.68rem;
+      opacity: 0.82;
+      line-height: 1.2;
+    }
+
+    .diff-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      margin-bottom: 2px;
+    }
+
+    .easy-dot {
+      background: #4caf50;
+    }
+
+    .med-dot {
+      background: #ff9800;
+    }
+
+    .hard-dot {
+      background: #f44336;
+    }
+
+    .start-btn {
+      width: 100%;
+      background: var(--accent);
+      color: #ffffff;
+      padding: 14px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      border-radius: 12px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .start-btn:hover {
+      opacity: 0.92;
+      transform: translateY(-1px);
+    }
+
+    .setup-footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: -4px;
+    }
+
+    .link-btn {
+      background: none;
+      border: none;
+      color: var(--accent);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 6px 10px;
+      border-radius: 6px;
+    }
+
+    .link-btn:hover {
+      background: var(--surface-alt);
+    }
+
+    /* Header brand & mode pill */
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mode-pill {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+      background: var(--surface-alt);
+      color: var(--accent);
+      border: 1px solid var(--border);
+    }
+
+    /* ============================================================
+       Accessibility — focus outlines
+    ============================================================ */
+    .cell:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: -3px;
+      z-index: 1;
+    }
+
+    /* ============================================================
+       Responsive tweaks
+    ============================================================ */
+    @media (max-width: 420px) {
+      header h1 {
+        font-size: 1.2rem;
+      }
+
+      .icon-btn,
+      .diff-btn,
+      .reset-btn {
+        padding: 6px 9px;
+        font-size: 0.72rem;
+      }
+
+      #timer {
+        font-size: 1rem;
+      }
+
+      .modal {
+        padding: 16px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ===================== CONFETTI CANVAS (Win celebration) ===================== -->
+  <canvas id="confetti-canvas" aria-hidden="true"></canvas>
+
+  <!-- ===================== INSTRUCTIONS MODAL ===================== -->
+  <div id="help-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="help-title">
+    <div class="modal" id="help-modal-content">
+      <button class="modal-close" id="help-close" aria-label="Close instructions">×</button>
+
+      <h2 id="help-title">📖 How to Play Sudoku</h2>
+
+      <section>
+        <h3>🎯 The Goal</h3>
+        <p>Fill every cell so that each <strong>row</strong>, <strong>column</strong>, and <strong>subgrid box</strong>
+          contains each digit exactly once without duplicates:</p>
+        <ul>
+          <li><strong>4×4 Mini:</strong> Uses digits <strong>1–4</strong> with 2×2 subgrids.</li>
+          <li><strong>6×6 Junior:</strong> Uses digits <strong>1–6</strong> with 2×3 subgrids.</li>
+          <li><strong>9×9 Classic:</strong> Uses digits <strong>1–9</strong> with 3×3 subgrids.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>⚙️ Choosing Grid Size &amp; Difficulty</h3>
+        <p>Before the grid shows, select your desired <strong>Grid Size</strong> (4×4, 6×6, or 9×9) and
+          <strong>Difficulty</strong> (Easy, Medium, or Hard), then click <strong>▶️ Start Game</strong>. You can return
+          to change settings anytime with the <strong>⚙️ Setup</strong> button.</p>
+      </section>
+
+      <section>
+        <h3>⌨️ Entering Numbers</h3>
+        <ul>
+          <li>Click a cell to select it, then press a number key on your keyboard.</li>
+          <li>Or click a cell, then tap a number on the on-screen number pad.</li>
+          <li>Press <strong>Delete</strong> or <strong>Backspace</strong> (or tap <strong>✕ Erase</strong>) to clear a
+            cell.</li>
+          <li>Use <strong>Arrow Keys</strong> to move between cells.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>✏️ Pencil / Notes Mode</h3>
+        <ul>
+          <li>Toggle with the <strong>✏️ Pencil</strong> button or press <strong>P</strong>.</li>
+          <li>In pencil mode, clicking a digit adds or removes a candidate <em>note</em> in the cell.</li>
+          <li>Notes appear as a small mini-grid of candidate numbers inside the cell.</li>
+          <li>Placing a final number clears all pencil marks in that cell automatically.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>🚨 Real-Time Conflict Highlighting &amp; Audio Alert</h3>
+        <p>If you enter a number that causes a duplicate in its row, column, or box:
+        <ul>
+          <li>The cell turns <span style="color:#e53935;font-weight:700;">red with a dashed border</span>.</li>
+          <li>A bold <strong>!</strong> badge appears in the top-right corner (color-blind friendly).</li>
+          <li>A brief two-tone <strong>sound alert</strong> chimes instantly.</li>
+        </ul>
+        The conflict clears as soon as the duplicate is corrected.</p>
+      </section>
+
+      <section>
+        <h3>⏱️ Timer &amp; Reset</h3>
+        <p>The timer starts when the puzzle loads. Hit <strong>↺ Reset</strong> to clear your entries and restart the
+          timer for the same puzzle. Use <strong>⚙️ Setup</strong> to switch grid size or generate a new puzzle.</p>
+      </section>
+
+      <section>
+        <h3>🎨 Theme Selector</h3>
+        <p>Click <strong>🎨 Theme</strong> to choose from 7 animated background themes including Classic, Midnight,
+          Ocean, Forest, Sunset, Galaxy, and Blossom.</p>
+      </section>
+    </div>
+  </div>
+
+  <!-- ===================== WIN MODAL ===================== -->
+  <div id="win-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="win-title">
+    <div class="modal">
+      <div class="win-emoji" aria-hidden="true">🎉</div>
+      <h2 id="win-title">Puzzle Solved!</h2>
+      <p id="win-details">Congratulations — you completed the puzzle!</p>
+      <p class="win-time" id="win-time-display"></p>
+      <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:14px;">
+        <button class="play-again-btn" id="play-again-btn">Play Again</button>
+        <button class="icon-btn" id="win-setup-btn" style="padding:12px 20px; font-size:0.95rem; border-radius:10px;">⚙️
+          Change Setup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== THEME PICKER MODAL ===================== -->
+  <div id="theme-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="theme-modal-title">
+    <div class="modal" id="theme-modal-content">
+      <button class="modal-close" id="theme-modal-close" aria-label="Close theme picker">×</button>
+      <h2 id="theme-modal-title">🎨 Choose a Theme</h2>
+      <p style="font-size:0.84rem;color:var(--text-muted)">Pick a background style for your game. Changes apply
+        instantly.</p>
+
+      <div class="theme-grid" role="list" aria-label="Available themes">
+
+        <button class="theme-card active" data-theme="classic" aria-label="Classic theme" role="listitem">
+          <div class="theme-swatch swatch-classic">☀️</div>
+          <div class="theme-name">Classic</div>
+        </button>
+
+        <button class="theme-card" data-theme="midnight" aria-label="Midnight theme" role="listitem">
+          <div class="theme-swatch swatch-midnight">🌙</div>
+          <div class="theme-name">Midnight</div>
+        </button>
+
+        <button class="theme-card" data-theme="ocean" aria-label="Ocean theme" role="listitem">
+          <div class="theme-swatch swatch-ocean">🌊</div>
+          <div class="theme-name">Ocean</div>
+        </button>
+
+        <button class="theme-card" data-theme="forest" aria-label="Forest theme" role="listitem">
+          <div class="theme-swatch swatch-forest">🌿</div>
+          <div class="theme-name">Forest</div>
+        </button>
+
+        <button class="theme-card" data-theme="sunset" aria-label="Sunset theme" role="listitem">
+          <div class="theme-swatch swatch-sunset">🌅</div>
+          <div class="theme-name">Sunset</div>
+        </button>
+
+        <button class="theme-card" data-theme="galaxy" aria-label="Galaxy theme" role="listitem">
+          <div class="theme-swatch swatch-galaxy">✨</div>
+          <div class="theme-name">Galaxy</div>
+        </button>
+
+        <button class="theme-card" data-theme="blossom" aria-label="Blossom theme" role="listitem">
+          <div class="theme-swatch swatch-blossom">🌸</div>
+          <div class="theme-name">Blossom</div>
+        </button>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== HEADER ===================== -->
+  <header>
+    <div class="header-brand">
+      <h1>Sudoku</h1>
+      <span class="mode-pill" id="grid-mode-pill" style="display:none;" title="Current grid size">9×9</span>
+    </div>
+    <div class="header-btns">
+      <button class="icon-btn" id="setup-btn" aria-label="Change puzzle setup" title="New Game & Grid Size">⚙️
+        Setup</button>
+      <button class="icon-btn" id="theme-btn" aria-label="Choose a theme" title="Choose theme">🎨 Theme</button>
+      <button class="icon-btn" id="help-btn" aria-label="Open instructions" title="How to play">❓ Help</button>
+    </div>
+  </header>
+
+  <!-- ===================== SETUP SCREEN (Shown before grid) ===================== -->
+  <div id="setup-screen" class="setup-container">
+    <div class="setup-card">
+      <div class="setup-header">
+        <span class="setup-badge">Sudoku Prototype</span>
+        <h2 class="setup-title">Start a New Game</h2>
+        <p class="setup-sub">Choose your grid size and difficulty tier to generate a uniquely solvable puzzle.</p>
+      </div>
+
+      <!-- Grid Size Option Buttons -->
+      <div class="setup-section">
+        <label class="setup-label">📐 Select Grid Size</label>
+        <div class="setup-options" id="setup-size-options" role="radiogroup" aria-label="Grid size">
+          <button type="button" class="setup-opt-btn" data-size="4" role="radio" aria-checked="false"
+            aria-label="4 by 4 Mini Sudoku">
+            <span class="opt-badge">Mini</span>
+            <span class="opt-title">4 × 4</span>
+            <span class="opt-desc">2×2 blocks • 1–4</span>
+          </button>
+          <button type="button" class="setup-opt-btn" data-size="6" role="radio" aria-checked="false"
+            aria-label="6 by 6 Junior Sudoku">
+            <span class="opt-badge">Junior</span>
+            <span class="opt-title">6 × 6</span>
+            <span class="opt-desc">2×3 blocks • 1–6</span>
+          </button>
+          <button type="button" class="setup-opt-btn active" data-size="9" role="radio" aria-checked="true"
+            aria-label="9 by 9 Classic Sudoku">
+            <span class="opt-badge">Classic</span>
+            <span class="opt-title">9 × 9</span>
+            <span class="opt-desc">3×3 blocks • 1–9</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Difficulty Option Buttons -->
+      <div class="setup-section">
+        <label class="setup-label">🎯 Select Difficulty</label>
+        <div class="setup-options" id="setup-diff-options" role="radiogroup" aria-label="Difficulty">
+          <button type="button" class="setup-opt-btn active" data-diff="easy" role="radio" aria-checked="true"
+            aria-label="Easy difficulty">
+            <span class="diff-dot easy-dot"></span>
+            <span class="opt-title" style="font-size:1.05rem;">Easy</span>
+            <span class="opt-desc">More clues, gentle start</span>
+          </button>
+          <button type="button" class="setup-opt-btn" data-diff="medium" role="radio" aria-checked="false"
+            aria-label="Medium difficulty">
+            <span class="diff-dot med-dot"></span>
+            <span class="opt-title" style="font-size:1.05rem;">Medium</span>
+            <span class="opt-desc">Balanced puzzle</span>
+          </button>
+          <button type="button" class="setup-opt-btn" data-diff="hard" role="radio" aria-checked="false"
+            aria-label="Hard difficulty">
+            <span class="diff-dot hard-dot"></span>
+            <span class="opt-title" style="font-size:1.05rem;">Hard</span>
+            <span class="opt-desc">Fewer clues, deeper logic</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Start Game Action -->
+      <div class="setup-section" style="margin-top:4px;">
+        <button id="start-game-btn" class="start-btn" aria-label="Start Game with selected settings">
+          ▶️ Start Game
+        </button>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="setup-footer-links">
+        <button type="button" class="link-btn" id="setup-help-link">📖 How to Play</button>
+        <button type="button" class="link-btn" id="setup-theme-link">🎨 Choose Theme</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== GAME VIEW (Hidden until Start Game is clicked) ===================== -->
+  <main id="game-view" style="display:none;">
+
+    <!-- Difficulty + Timer + Reset -->
+    <div class="controls">
+      <div class="difficulty-group" role="group" aria-label="Select difficulty">
+        <button class="diff-btn active" data-diff="easy" aria-pressed="true">Easy</button>
+        <button class="diff-btn" data-diff="medium" aria-pressed="false">Medium</button>
+        <button class="diff-btn" data-diff="hard" aria-pressed="false">Hard</button>
+      </div>
+      <div class="timer-block">
+        <span id="timer" aria-label="Elapsed time" aria-live="off">00:00</span>
+        <button class="reset-btn" id="reset-btn" aria-label="Reset puzzle">↺ Reset</button>
+      </div>
+    </div>
+
+    <!-- Grid -->
+    <div id="grid-wrapper" aria-label="Sudoku grid">
+      <div id="sudoku-grid" role="grid" aria-label="Sudoku puzzle"></div>
+    </div>
+
+    <!-- Pencil toggle -->
+    <button id="pencil-btn" aria-pressed="false" aria-label="Toggle pencil/notes mode">
+      ✏️ Pencil Mode: OFF
+    </button>
+
+    <!-- Number pad (dynamically populated based on grid size) -->
+    <div class="numpad" role="group" aria-label="Number input"></div>
+
+  </main>
+
+  <script>
+    /* ================================================================
+       STATE
+    ================================================================ */
+    const state = {
+      gridSize: 9,          // active grid size: 4, 6, 9
+      boxRows: 3,           // subgrid box rows (2 for 4 and 6, 3 for 9)
+      boxCols: 3,           // subgrid box cols (2 for 4, 3 for 6 and 9)
+      selectedSize: 9,      // choice in setup screen
+      selectedDiff: 'easy', // choice in setup screen
+      difficulty: 'easy',   // active difficulty
+      solution: [],         // fully solved grid
+      puzzle: [],           // starting clues (0 = empty)
+      board: [],            // player's current values
+      pencil: [],           // candidate notes per cell (Set of numbers)
+      selected: -1,         // index of selected cell
+      pencilMode: false,
+      timerSecs: 0,
+      timerHandle: null,
+      solved: false,
+      theme: 'classic',     // active theme id
+    };
+
+    /* ================================================================
+       PUZZLE GENERATION — Generalized Backtracking Solver + Cell Removal
+    ================================================================ */
+
+    /** Shuffle an array in-place (Fisher-Yates). */
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    /** Return true if placing `num` at `idx` on `grid` is valid for given grid dimensions. */
+    function isValid(grid, idx, num, size = state.gridSize, boxRows = state.boxRows, boxCols = state.boxCols) {
+      const row = Math.floor(idx / size);
+      const col = idx % size;
+      const boxRow = Math.floor(row / boxRows) * boxRows;
+      const boxCol = Math.floor(col / boxCols) * boxCols;
+
+      for (let i = 0; i < size; i++) {
+        // Row check
+        if (grid[row * size + i] === num) return false;
+        // Column check
+        if (grid[i * size + col] === num) return false;
+      }
+      // Subgrid box check
+      for (let r = 0; r < boxRows; r++) {
+        for (let c = 0; c < boxCols; c++) {
+          if (grid[(boxRow + r) * size + (boxCol + c)] === num) return false;
+        }
+      }
+      return true;
+    }
+
+    /**
+     * Fill `grid` with a valid solved Sudoku using backtracking.
+     * Returns true on success. Randomises digit order for variety.
+     */
+    function fillGrid(grid, size, boxRows, boxCols) {
+      const idx = grid.indexOf(0);
+      if (idx === -1) return true; // no empty cell → solved
+
+      const digits = shuffle([...Array(size)].map((_, i) => i + 1));
+      for (const d of digits) {
+        if (isValid(grid, idx, d, size, boxRows, boxCols)) {
+          grid[idx] = d;
+          if (fillGrid(grid, size, boxRows, boxCols)) return true;
+          grid[idx] = 0;
+        }
+      }
+      return false;
+    }
+
+    /**
+     * Count solutions of `grid` up to `limit`.
+     * Returns early once `limit` solutions are found (used to check uniqueness).
+     */
+    function countSolutions(grid, limit = 2, size, boxRows, boxCols) {
+      const idx = grid.indexOf(0);
+      if (idx === -1) return 1; // solved
+
+      let count = 0;
+      for (let d = 1; d <= size; d++) {
+        if (isValid(grid, idx, d, size, boxRows, boxCols)) {
+          grid[idx] = d;
+          count += countSolutions(grid, limit, size, boxRows, boxCols);
+          grid[idx] = 0;
+          if (count >= limit) return count; // early exit
+        }
+      }
+      return count;
+    }
+
+    /**
+     * Generate a valid, uniquely solvable puzzle for the given size and difficulty.
+     */
+    function generatePuzzle(size, difficulty) {
+      const boxRows = size === 4 ? 2 : size === 6 ? 2 : 3;
+      const boxCols = size === 4 ? 2 : size === 6 ? 3 : 3;
+      const totalCells = size * size;
+
+      // Clue count targets based on grid size and difficulty
+      const clueTargets = {
+        4: { easy: 9, medium: 7, hard: 5 },
+        6: { easy: 20, medium: 16, hard: 12 },
+        9: { easy: 35, medium: 28, hard: 22 }
+      };
+
+      const target = clueTargets[size] ? (clueTargets[size][difficulty] || Math.floor(totalCells * 0.4)) : 28;
+
+      // 1) Build a fully solved grid
+      const solution = Array(totalCells).fill(0);
+      fillGrid(solution, size, boxRows, boxCols);
+      state.solution = [...solution];
+
+      // 2) Remove cells while ensuring exactly one unique solution
+      const puzzle = [...solution];
+      const indices = shuffle([...Array(totalCells).keys()]);
+      let remaining = totalCells;
+
+      for (const idx of indices) {
+        if (remaining <= target) break;
+        const backup = puzzle[idx];
+        puzzle[idx] = 0;
+
+        // Check uniqueness — if more than 1 solution, restore cell
+        const test = [...puzzle];
+        if (countSolutions(test, 2, size, boxRows, boxCols) !== 1) {
+          puzzle[idx] = backup;
+        } else {
+          remaining--;
+        }
+      }
+
+      state.puzzle = [...puzzle];
+    }
+
+    /* ================================================================
+       TIMER
+    ================================================================ */
+    function startTimer() {
+      stopTimer();
+      state.timerSecs = 0;
+      updateTimerDisplay();
+      state.timerHandle = setInterval(() => {
+        state.timerSecs++;
+        updateTimerDisplay();
+      }, 1000);
+    }
+
+    function stopTimer() {
+      if (state.timerHandle) {
+        clearInterval(state.timerHandle);
+        state.timerHandle = null;
+      }
+    }
+
+    function updateTimerDisplay() {
+      const m = String(Math.floor(state.timerSecs / 60)).padStart(2, '0');
+      const s = String(state.timerSecs % 60).padStart(2, '0');
+      document.getElementById('timer').textContent = `${m}:${s}`;
+    }
+
+    function formatTime(secs) {
+      const m = String(Math.floor(secs / 60)).padStart(2, '0');
+      const s = String(secs % 60).padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
+    /* ================================================================
+       AUDIO — Web Audio API (no external files needed)
+    ================================================================ */
+    let _audioCtx = null;
+    function getAudioCtx() {
+      if (!_audioCtx) {
+        _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (_audioCtx.state === 'suspended') _audioCtx.resume();
+      return _audioCtx;
+    }
+
+    /**
+     * Play a short "conflict" alert sound: a brief descending two-tone
+     * buzz using two oscillators so it's distinct and clearly negative.
+     */
+    function playConflictSound() {
+      try {
+        const ctx = getAudioCtx();
+        const now = ctx.currentTime;
+
+        // Oscillator 1: high note
+        const osc1 = ctx.createOscillator();
+        const gain1 = ctx.createGain();
+        osc1.type = 'square';
+        osc1.frequency.setValueAtTime(520, now);
+        osc1.frequency.linearRampToValueAtTime(280, now + 0.12);
+        gain1.gain.setValueAtTime(0.18, now);
+        gain1.gain.linearRampToValueAtTime(0, now + 0.14);
+        osc1.connect(gain1);
+        gain1.connect(ctx.destination);
+        osc1.start(now);
+        osc1.stop(now + 0.14);
+
+        // Oscillator 2: low note (staggered)
+        const osc2 = ctx.createOscillator();
+        const gain2 = ctx.createGain();
+        osc2.type = 'square';
+        osc2.frequency.setValueAtTime(320, now + 0.08);
+        osc2.frequency.linearRampToValueAtTime(180, now + 0.22);
+        gain2.gain.setValueAtTime(0, now + 0.08);
+        gain2.gain.linearRampToValueAtTime(0.14, now + 0.10);
+        gain2.gain.linearRampToValueAtTime(0, now + 0.24);
+        osc2.connect(gain2);
+        gain2.connect(ctx.destination);
+        osc2.start(now + 0.08);
+        osc2.stop(now + 0.26);
+      } catch (e) {
+        // Silently fail if Web Audio API is unavailable
+      }
+    }
+
+    /**
+     * Play an uplifting, harmonious victory fanfare chord and arpeggio
+     * synthesized via Web Audio API.
+     */
+    function playWinSound() {
+      try {
+        const ctx = getAudioCtx();
+        const now = ctx.currentTime;
+
+        // Celebratory melodic sequence ending in a sustained major chord
+        const notes = [
+          { freq: 392.00, start: 0.00, dur: 0.12, gain: 0.20 }, // G4
+          { freq: 523.25, start: 0.11, dur: 0.12, gain: 0.22 }, // C5
+          { freq: 659.25, start: 0.22, dur: 0.12, gain: 0.24 }, // E5
+          { freq: 783.99, start: 0.33, dur: 0.18, gain: 0.26 }, // G5
+          // Final triumphant chord: C5 + E5 + G5 + C6
+          { freq: 523.25, start: 0.48, dur: 1.15, gain: 0.20 }, // C5
+          { freq: 659.25, start: 0.48, dur: 1.15, gain: 0.18 }, // E5
+          { freq: 783.99, start: 0.48, dur: 1.15, gain: 0.22 }, // G5
+          { freq: 1046.50, start: 0.48, dur: 1.35, gain: 0.28 }, // C6
+        ];
+
+        notes.forEach(n => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+
+          osc.type = 'triangle'; // Warm, bell-like, pleasing tone
+          osc.frequency.setValueAtTime(n.freq, now + n.start);
+
+          const startTime = now + n.start;
+          const peakTime = startTime + 0.02;
+          const endTime = startTime + n.dur;
+
+          gain.gain.setValueAtTime(0.001, startTime);
+          gain.gain.exponentialRampToValueAtTime(n.gain, peakTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, endTime);
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+
+          osc.start(startTime);
+          osc.stop(endTime);
+        });
+      } catch (e) {
+        // Silently fail if Web Audio is blocked or unavailable
+      }
+    }
+
+    /**
+     * Launch a dynamic full-screen confetti particle animation.
+     */
+    let _confettiAnimId = null;
+    function triggerConfetti(durationMs = 4500) {
+      const canvas = document.getElementById('confetti-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      const width = (canvas.width = window.innerWidth);
+      const height = (canvas.height = window.innerHeight);
+
+      if (_confettiAnimId) {
+        cancelAnimationFrame(_confettiAnimId);
+        _confettiAnimId = null;
+      }
+
+      const colors = ['#f44336', '#e91e63', '#9c27b0', '#2196f3', '#4caf50', '#ffeb3b', '#ff9800', '#00bcd4', '#ffd700'];
+      const particles = [];
+      const count = 130;
+
+      for (let i = 0; i < count; i++) {
+        const fromLeft = i % 2 === 0;
+        particles.push({
+          x: fromLeft ? width * 0.15 + (Math.random() * 60 - 30) : width * 0.85 + (Math.random() * 60 - 30),
+          y: height * 0.42 + (Math.random() * 80 - 40),
+          vx: (fromLeft ? 1 : -1) * (Math.random() * 11 + 4),
+          vy: -(Math.random() * 14 + 7),
+          size: Math.random() * 9 + 6,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          rotation: Math.random() * 360,
+          rotSpeed: (Math.random() - 0.5) * 12,
+          gravity: 0.36,
+          drag: 0.965,
+          opacity: 1,
+          shape: Math.random() > 0.4 ? 'rect' : 'circle',
+        });
+      }
+
+      const startTime = performance.now();
+
+      function frame(now) {
+        const elapsed = now - startTime;
+        ctx.clearRect(0, 0, width, height);
+
+        let alive = 0;
+        for (const p of particles) {
+          p.vx *= p.drag;
+          p.vy += p.gravity;
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rotation += p.rotSpeed;
+
+          if (elapsed > durationMs * 0.6) {
+            p.opacity = Math.max(0, 1 - (elapsed - durationMs * 0.6) / (durationMs * 0.4));
+          }
+
+          if (p.y < height + 40 && p.opacity > 0.01) {
+            alive++;
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate((p.rotation * Math.PI) / 180);
+            ctx.globalAlpha = p.opacity;
+            ctx.fillStyle = p.color;
+
+            if (p.shape === 'rect') {
+              ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+            } else {
+              ctx.beginPath();
+              ctx.arc(0, 0, p.size / 2.5, 0, Math.PI * 2);
+              ctx.fill();
+            }
+            ctx.restore();
+          }
+        }
+
+        if (elapsed < durationMs && alive > 0) {
+          _confettiAnimId = requestAnimationFrame(frame);
+        } else {
+          ctx.clearRect(0, 0, width, height);
+          _confettiAnimId = null;
+        }
+      }
+
+      _confettiAnimId = requestAnimationFrame(frame);
+    }
+
+    function stopConfetti() {
+      if (_confettiAnimId) {
+        cancelAnimationFrame(_confettiAnimId);
+        _confettiAnimId = null;
+      }
+      const canvas = document.getElementById('confetti-canvas');
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+
+    /**
+     * Trigger all win celebration effects:
+     * 1. Audio victory fanfare
+     * 2. Fullscreen colorful confetti
+     * 3. Board ripple wave animation
+     */
+    function triggerWinCelebration() {
+      playWinSound();
+      triggerConfetti(4500);
+
+      // Ripple celebration pop on each cell
+      const cells = document.querySelectorAll('.cell');
+      cells.forEach((cell, idx) => {
+        cell.classList.remove('selected', 'peer');
+        cell.classList.add('win-cell');
+        const col = idx % state.gridSize;
+        const row = Math.floor(idx / state.gridSize);
+        cell.style.animationDelay = `${(col + row) * 45}ms`;
+      });
+    }
+
+    /* ================================================================
+       CONFLICT DETECTION (generalized for any grid size)
+    ================================================================ */
+    function getConflicts(board) {
+      const conflictSet = new Set();
+      const size = state.gridSize;
+      const boxRows = state.boxRows;
+      const boxCols = state.boxCols;
+      const total = size * size;
+
+      for (let idx = 0; idx < total; idx++) {
+        const val = board[idx];
+        if (!val) continue;
+
+        const row = Math.floor(idx / size);
+        const col = idx % size;
+        const boxRow = Math.floor(row / boxRows) * boxRows;
+        const boxCol = Math.floor(col / boxCols) * boxCols;
+
+        for (let i = 0; i < size; i++) {
+          // Row peers
+          const ri = row * size + i;
+          if (ri !== idx && board[ri] === val) {
+            conflictSet.add(idx);
+            conflictSet.add(ri);
+          }
+          // Col peers
+          const ci = i * size + col;
+          if (ci !== idx && board[ci] === val) {
+            conflictSet.add(idx);
+            conflictSet.add(ci);
+          }
+        }
+        // Box peers
+        for (let r = 0; r < boxRows; r++) {
+          for (let c = 0; c < boxCols; c++) {
+            const bi = (boxRow + r) * size + (boxCol + c);
+            if (bi !== idx && board[bi] === val) {
+              conflictSet.add(idx);
+              conflictSet.add(bi);
+            }
+          }
+        }
+      }
+      return conflictSet;
+    }
+
+    function getPeers(idx) {
+      const peers = new Set();
+      const size = state.gridSize;
+      const boxRows = state.boxRows;
+      const boxCols = state.boxCols;
+
+      const row = Math.floor(idx / size);
+      const col = idx % size;
+      const boxRow = Math.floor(row / boxRows) * boxRows;
+      const boxCol = Math.floor(col / boxCols) * boxCols;
+
+      for (let i = 0; i < size; i++) {
+        peers.add(row * size + i);
+        peers.add(i * size + col);
+      }
+      for (let r = 0; r < boxRows; r++) {
+        for (let c = 0; c < boxCols; c++) {
+          peers.add((boxRow + r) * size + (boxCol + c));
+        }
+      }
+      peers.delete(idx);
+      return peers;
+    }
+
+    /* ================================================================
+       SOLVE CHECK
+    ================================================================ */
+    function isBoardSolved() {
+      const total = state.gridSize * state.gridSize;
+      for (let i = 0; i < total; i++) {
+        if (state.board[i] !== state.solution[i]) return false;
+      }
+      return true;
+    }
+
+    /* ================================================================
+       RENDERING
+    ================================================================ */
+    function renderGrid() {
+      const grid = document.getElementById('sudoku-grid');
+      grid.innerHTML = '';
+      grid.style.gridTemplateColumns = `repeat(${state.gridSize}, 1fr)`;
+      grid.style.gridTemplateRows = `repeat(${state.gridSize}, 1fr)`;
+      grid.className = 'size-' + state.gridSize;
+
+      const total = state.gridSize * state.gridSize;
+      for (let i = 0; i < total; i++) {
+        const row = Math.floor(i / state.gridSize);
+        const col = i % state.gridSize;
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.dataset.idx = i;
+        cell.dataset.row = row;
+        cell.dataset.col = col;
+        cell.setAttribute('tabindex', '0');
+        cell.setAttribute('role', 'gridcell');
+        cell.setAttribute('aria-label', `Row ${row + 1}, Column ${col + 1}`);
+
+        // Add subgrid delineation classes
+        if ((col + 1) % state.boxCols === 0 && col !== state.gridSize - 1) {
+          cell.classList.add('subgrid-right');
+        }
+        if ((row + 1) % state.boxRows === 0 && row !== state.gridSize - 1) {
+          cell.classList.add('subgrid-bottom');
+        }
+
+        if (state.puzzle[i]) {
+          cell.classList.add('given');
+        }
+
+        grid.appendChild(cell);
+      }
+    }
+
+    function renderNumpad() {
+      const numpad = document.querySelector('.numpad');
+      numpad.innerHTML = '';
+
+      // Column layout
+      if (state.gridSize === 4) {
+        numpad.style.gridTemplateColumns = 'repeat(5, 1fr)';
+      } else if (state.gridSize === 6) {
+        numpad.style.gridTemplateColumns = 'repeat(4, 1fr)';
+      } else {
+        numpad.style.gridTemplateColumns = 'repeat(5, 1fr)';
+      }
+
+      // Add digit buttons
+      for (let n = 1; n <= state.gridSize; n++) {
+        const btn = document.createElement('button');
+        btn.className = 'num-btn';
+        btn.dataset.num = n;
+        btn.setAttribute('aria-label', `Enter ${n}`);
+        btn.textContent = n;
+        btn.addEventListener('click', () => enterNumber(n));
+        numpad.appendChild(btn);
+      }
+
+      // Add erase button
+      const eraseBtn = document.createElement('button');
+      eraseBtn.className = 'num-btn erase-btn';
+      eraseBtn.id = 'erase-btn';
+      eraseBtn.setAttribute('aria-label', 'Erase cell');
+      eraseBtn.textContent = '✕ Erase';
+      if (state.gridSize === 6) {
+        eraseBtn.style.gridColumn = 'span 2';
+      }
+      eraseBtn.addEventListener('click', eraseCell);
+      numpad.appendChild(eraseBtn);
+    }
+
+    /**
+     * Re-render visual state of all cells:
+     * values, pencil marks, selection, peers, conflicts, same-number highlights.
+     */
+    function updateCells() {
+      const conflicts = getConflicts(state.board);
+      const selectedVal = state.selected >= 0 ? state.board[state.selected] : 0;
+      const peers = state.selected >= 0 ? getPeers(state.selected) : new Set();
+
+      const cells = document.querySelectorAll('.cell');
+      cells.forEach(cell => {
+        const idx = +cell.dataset.idx;
+        const val = state.board[idx];
+
+        cell.classList.remove('selected', 'peer', 'conflict', 'same-number');
+        cell.innerHTML = '';
+
+        if (val) {
+          const span = document.createElement('span');
+          span.className = 'cell-value';
+          span.textContent = val;
+          cell.appendChild(span);
+        } else {
+          const marks = state.pencil[idx];
+          if (marks && marks.size > 0) {
+            const pg = document.createElement('div');
+            pg.className = 'pencil-grid';
+            pg.setAttribute('aria-hidden', 'true');
+            pg.style.gridTemplateColumns = `repeat(${state.boxCols}, 1fr)`;
+            pg.style.gridTemplateRows = `repeat(${state.boxRows}, 1fr)`;
+
+            for (let n = 1; n <= state.gridSize; n++) {
+              const pm = document.createElement('div');
+              pm.className = 'pencil-mark';
+              if (state.gridSize === 4) pm.style.fontSize = 'clamp(0.65rem, 2.2vw, 0.95rem)';
+              else if (state.gridSize === 6) pm.style.fontSize = 'clamp(0.55rem, 1.8vw, 0.78rem)';
+              pm.textContent = marks.has(n) ? n : '';
+              pg.appendChild(pm);
+            }
+            cell.appendChild(pg);
+          }
+        }
+
+        if (idx === state.selected) {
+          cell.classList.add('selected');
+        } else if (peers.has(idx)) {
+          cell.classList.add('peer');
+        }
+
+        if (conflicts.has(idx)) {
+          cell.classList.add('conflict');
+        }
+
+        if (selectedVal && val === selectedVal && idx !== state.selected) {
+          cell.classList.add('same-number');
+        }
+
+        let ariaLabel = `Row ${+cell.dataset.row + 1}, Column ${+cell.dataset.col + 1}`;
+        if (val) ariaLabel += `, value ${val}`;
+        if (state.puzzle[idx]) ariaLabel += ', given';
+        if (conflicts.has(idx)) ariaLabel += ', conflict';
+        cell.setAttribute('aria-label', ariaLabel);
+      });
+    }
+
+    /* ================================================================
+       CELL INTERACTION
+    ================================================================ */
+    function selectCell(idx) {
+      state.selected = idx;
+      updateCells();
+      const cell = document.querySelector(`.cell[data-idx="${idx}"]`);
+      if (cell) cell.focus();
+    }
+
+    function enterNumber(num) {
+      const idx = state.selected;
+      if (idx < 0) return;
+      if (state.puzzle[idx]) return; // given cell — immutable
+      if (state.solved) return;
+      if (num < 1 || num > state.gridSize) return;
+
+      if (state.pencilMode) {
+        if (state.board[idx]) return; // cell has a confirmed number
+        const marks = state.pencil[idx];
+        if (marks.has(num)) {
+          marks.delete(num);
+        } else {
+          marks.add(num);
+        }
+      } else {
+        const conflictsBefore = getConflicts(state.board).size;
+
+        state.board[idx] = num;
+        state.pencil[idx].clear();
+
+        const conflictsAfter = getConflicts(state.board).size;
+        if (conflictsAfter > conflictsBefore) {
+          playConflictSound();
+        }
+
+        if (isBoardSolved()) {
+          stopTimer();
+          state.solved = true;
+          triggerWinCelebration();
+          setTimeout(showWinModal, 650);
+        }
+      }
+      updateCells();
+    }
+
+    function eraseCell() {
+      const idx = state.selected;
+      if (idx < 0) return;
+      if (state.puzzle[idx]) return;
+      if (state.solved) return;
+
+      state.board[idx] = 0;
+      state.pencil[idx].clear();
+      updateCells();
+    }
+
+    /* ================================================================
+       WIN MODAL
+    ================================================================ */
+    function showWinModal() {
+      document.getElementById('win-details').textContent =
+        `You solved the ${state.gridSize}×${state.gridSize} (${state.difficulty.toUpperCase()}) Sudoku!`;
+      document.getElementById('win-time-display').textContent =
+        `Time: ${formatTime(state.timerSecs)}`;
+      openModal(document.getElementById('win-modal'));
+    }
+
+    /* ================================================================
+       SETUP SCREEN & GAME LIFECYCLE
+    ================================================================ */
+    function showSetupScreen() {
+      stopTimer();
+      stopConfetti();
+      document.getElementById('setup-screen').style.display = 'flex';
+      document.getElementById('game-view').style.display = 'none';
+      document.getElementById('grid-mode-pill').style.display = 'none';
+
+      // Sync active button states in setup screen
+      document.querySelectorAll('#setup-size-options .setup-opt-btn').forEach(btn => {
+        const isSelected = +btn.dataset.size === state.selectedSize;
+        btn.classList.toggle('active', isSelected);
+        btn.setAttribute('aria-checked', String(isSelected));
+      });
+      document.querySelectorAll('#setup-diff-options .setup-opt-btn').forEach(btn => {
+        const isSelected = btn.dataset.diff === state.selectedDiff;
+        btn.classList.toggle('active', isSelected);
+        btn.setAttribute('aria-checked', String(isSelected));
+      });
+    }
+
+    function startGame() {
+      document.getElementById('setup-screen').style.display = 'none';
+      document.getElementById('game-view').style.display = 'flex';
+
+      const pill = document.getElementById('grid-mode-pill');
+      pill.style.display = 'inline-block';
+      pill.textContent = `${state.selectedSize}×${state.selectedSize}`;
+
+      newGame(state.selectedSize, state.selectedDiff);
+    }
+
+    function newGame(size = state.gridSize, difficulty = state.difficulty) {
+      stopConfetti();
+      state.gridSize = size;
+      state.boxRows = size === 4 ? 2 : size === 6 ? 2 : 3;
+      state.boxCols = size === 4 ? 2 : size === 6 ? 3 : 3;
+      state.difficulty = difficulty;
+      state.solved = false;
+      state.selected = -1;
+      state.pencilMode = false;
+
+      const total = size * size;
+      generatePuzzle(size, difficulty);
+      state.board = [...state.puzzle];
+      state.pencil = Array.from({ length: total }, () => new Set());
+
+      updatePencilBtn();
+      renderGrid();
+      renderNumpad();
+      updateCells();
+      attachCellListeners();
+
+      startTimer();
+
+      // Update difficulty buttons on controls bar
+      document.querySelectorAll('.diff-btn').forEach(btn => {
+        const isActive = btn.dataset.diff === difficulty;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-pressed', String(isActive));
+      });
+
+      const pill = document.getElementById('grid-mode-pill');
+      pill.textContent = `${size}×${size}`;
+    }
+
+    function resetGame() {
+      if (state.solved) {
+        newGame(state.gridSize, state.difficulty);
+        return;
+      }
+      const total = state.gridSize * state.gridSize;
+      state.board = [...state.puzzle];
+      state.pencil = Array.from({ length: total }, () => new Set());
+      state.selected = -1;
+      state.solved = false;
+      updateCells();
+      startTimer();
+    }
+
+    /* ================================================================
+       PENCIL MODE
+    ================================================================ */
+    function togglePencilMode() {
+      state.pencilMode = !state.pencilMode;
+      updatePencilBtn();
+    }
+
+    function updatePencilBtn() {
+      const btn = document.getElementById('pencil-btn');
+      btn.textContent = `✏️ Pencil Mode: ${state.pencilMode ? 'ON' : 'OFF'}`;
+      btn.classList.toggle('active', state.pencilMode);
+      btn.setAttribute('aria-pressed', String(state.pencilMode));
+    }
+
+    /* ================================================================
+       THEME — multi-theme selector
+    ================================================================ */
+    const THEMES = {
+      classic: { label: 'Classic', emoji: '☀️' },
+      midnight: { label: 'Midnight', emoji: '🌙' },
+      ocean: { label: 'Ocean', emoji: '🌊' },
+      forest: { label: 'Forest', emoji: '🌿' },
+      sunset: { label: 'Sunset', emoji: '🌅' },
+      galaxy: { label: 'Galaxy', emoji: '✨' },
+      blossom: { label: 'Blossom', emoji: '🌸' },
+    };
+
+    function applyTheme(themeId) {
+      Object.keys(THEMES).forEach(id => {
+        document.body.classList.remove('theme-' + id);
+      });
+      if (themeId !== 'classic') {
+        document.body.classList.add('theme-' + themeId);
+      }
+      state.theme = themeId;
+
+      document.querySelectorAll('.theme-card').forEach(card => {
+        card.classList.toggle('active', card.dataset.theme === themeId);
+      });
+    }
+
+    /* ================================================================
+       MODAL UTILITIES
+    ================================================================ */
+    let _lastFocus = null;
+
+    function openModal(overlay) {
+      _lastFocus = document.activeElement;
+      overlay.classList.add('open');
+      const first = overlay.querySelector('button, [tabindex="0"]');
+      if (first) first.focus();
+      trapFocus(overlay);
+    }
+
+    function closeModal(overlay) {
+      overlay.classList.remove('open');
+      removeFocusTrap(overlay);
+      if (_lastFocus) _lastFocus.focus();
+    }
+
+    function trapFocus(overlay) {
+      overlay._focusTrapHandler = (e) => {
+        if (e.key !== 'Tab') return;
+        const focusable = [...overlay.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        )].filter(el => !el.disabled);
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey) {
+          if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+        } else {
+          if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+        }
+      };
+      overlay.addEventListener('keydown', overlay._focusTrapHandler);
+    }
+
+    function removeFocusTrap(overlay) {
+      if (overlay._focusTrapHandler) {
+        overlay.removeEventListener('keydown', overlay._focusTrapHandler);
+      }
+    }
+
+    /* ================================================================
+       CELL EVENT LISTENERS
+    ================================================================ */
+    function attachCellListeners() {
+      document.querySelectorAll('.cell').forEach(cell => {
+        cell.addEventListener('click', () => {
+          selectCell(+cell.dataset.idx);
+        });
+        cell.addEventListener('keydown', handleCellKeydown);
+      });
+    }
+
+    function handleCellKeydown(e) {
+      const idx = +e.currentTarget.dataset.idx;
+      const size = state.gridSize;
+      const row = Math.floor(idx / size);
+      const col = idx % size;
+
+      if (e.key >= '1' && e.key <= String(size)) {
+        e.preventDefault();
+        selectCell(idx);
+        enterNumber(+e.key);
+      } else if (e.key === 'Delete' || e.key === 'Backspace') {
+        e.preventDefault();
+        selectCell(idx);
+        eraseCell();
+      } else if (e.key === 'p' || e.key === 'P') {
+        e.preventDefault();
+        togglePencilMode();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        if (col < size - 1) selectCell(idx + 1);
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        if (col > 0) selectCell(idx - 1);
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (row < size - 1) selectCell(idx + size);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (row > 0) selectCell(idx - size);
+      }
+    }
+
+    /* ================================================================
+       GLOBAL KEYBOARD HANDLER
+    ================================================================ */
+    document.addEventListener('keydown', (e) => {
+      const helpOpen = document.getElementById('help-modal').classList.contains('open');
+      const winOpen = document.getElementById('win-modal').classList.contains('open');
+      const themeOpen = document.getElementById('theme-modal').classList.contains('open');
+      if (helpOpen || winOpen || themeOpen) {
+        if (e.key === 'Escape') {
+          if (helpOpen) closeModal(document.getElementById('help-modal'));
+          if (winOpen) closeModal(document.getElementById('win-modal'));
+          if (themeOpen) closeModal(document.getElementById('theme-modal'));
+        }
+        return;
+      }
+
+      if (e.key === 'p' || e.key === 'P') {
+        if (document.activeElement.classList.contains('cell')) return;
+        togglePencilMode();
+      }
+    });
+
+    /* ================================================================
+       BUTTON WIRE-UP & INITIALIZATION
+    ================================================================ */
+    function initUI() {
+      // Setup Screen Size buttons
+      document.querySelectorAll('#setup-size-options .setup-opt-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.selectedSize = +btn.dataset.size;
+          document.querySelectorAll('#setup-size-options .setup-opt-btn').forEach(b => {
+            const isSel = b === btn;
+            b.classList.toggle('active', isSel);
+            b.setAttribute('aria-checked', String(isSel));
+          });
+        });
+      });
+
+      // Setup Screen Difficulty buttons
+      document.querySelectorAll('#setup-diff-options .setup-opt-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.selectedDiff = btn.dataset.diff;
+          document.querySelectorAll('#setup-diff-options .setup-opt-btn').forEach(b => {
+            const isSel = b === btn;
+            b.classList.toggle('active', isSel);
+            b.setAttribute('aria-checked', String(isSel));
+          });
+        });
+      });
+
+      // Setup Start Game button
+      document.getElementById('start-game-btn').addEventListener('click', startGame);
+
+      // Header "⚙️ Setup" button
+      document.getElementById('setup-btn').addEventListener('click', showSetupScreen);
+
+      // Header grid mode pill click -> open setup screen
+      document.getElementById('grid-mode-pill').addEventListener('click', showSetupScreen);
+
+      // Setup footer links
+      document.getElementById('setup-help-link').addEventListener('click', () => {
+        openModal(document.getElementById('help-modal'));
+      });
+      document.getElementById('setup-theme-link').addEventListener('click', () => {
+        openModal(document.getElementById('theme-modal'));
+      });
+
+      // In-game Difficulty buttons
+      document.querySelectorAll('.diff-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (btn.dataset.diff !== state.difficulty) {
+            newGame(state.gridSize, btn.dataset.diff);
+          }
+        });
+      });
+
+      // Reset
+      document.getElementById('reset-btn').addEventListener('click', resetGame);
+
+      // Pencil
+      document.getElementById('pencil-btn').addEventListener('click', togglePencilMode);
+
+      // Theme button → open theme picker modal
+      document.getElementById('theme-btn').addEventListener('click', () => {
+        openModal(document.getElementById('theme-modal'));
+      });
+
+      // Theme picker: close button
+      document.getElementById('theme-modal-close').addEventListener('click', () => {
+        closeModal(document.getElementById('theme-modal'));
+      });
+
+      // Theme picker: click outside to close
+      document.getElementById('theme-modal').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('theme-modal')) {
+          closeModal(document.getElementById('theme-modal'));
+        }
+      });
+
+      // Theme picker cards
+      document.querySelectorAll('.theme-card').forEach(card => {
+        card.addEventListener('click', () => {
+          applyTheme(card.dataset.theme);
+        });
+      });
+
+      // Help button → open instructions modal
+      document.getElementById('help-btn').addEventListener('click', () => {
+        openModal(document.getElementById('help-modal'));
+      });
+
+      // Help close button
+      document.getElementById('help-close').addEventListener('click', () => {
+        closeModal(document.getElementById('help-modal'));
+      });
+
+      // Help modal click outside to close
+      document.getElementById('help-modal').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('help-modal')) {
+          closeModal(document.getElementById('help-modal'));
+        }
+      });
+
+      // Win modal buttons
+      document.getElementById('play-again-btn').addEventListener('click', () => {
+        closeModal(document.getElementById('win-modal'));
+        newGame(state.gridSize, state.difficulty);
+      });
+
+      document.getElementById('win-setup-btn').addEventListener('click', () => {
+        closeModal(document.getElementById('win-modal'));
+        showSetupScreen();
+      });
+
+      document.getElementById('win-modal').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('win-modal')) {
+          closeModal(document.getElementById('win-modal'));
+        }
+      });
+    }
+
+    /* ================================================================
+       FIRST-LOAD INSTRUCTIONS
+    ================================================================ */
+    function maybeShowInstructions() {
+      const seen = sessionStorage.getItem('sudoku-seen');
+      if (!seen) {
+        sessionStorage.setItem('sudoku-seen', '1');
+        setTimeout(() => openModal(document.getElementById('help-modal')), 350);
+      }
+    }
+
+    /* ================================================================
+       BOOT
+    ================================================================ */
+    initUI();
+    showSetupScreen();
+    maybeShowInstructions();
+  </script>
+</body>
+
+</html>
